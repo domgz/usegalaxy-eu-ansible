@@ -26,16 +26,17 @@ jobs:
         run: |
           rm -f group_vars/htcondor/vault.yml
           rm -f group_vars/htcondor-secondary/vault.yml
+          rm -f group_vars/all/ssh-keys_vault.yml
 
       - name: Update git submodules.
         working-directory: "infrastructure-playbook"
         run: |
           git submodule update --init --recursive --remote --checkout
 
-      - name: Set up Python 3.
+      - name: Set up Python.
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version-file: ".python-version"
 
       - name: Install uv.
         uses: astral-sh/setup-uv@v7
@@ -144,7 +145,7 @@ jobs:
 
           shopt -s nullglob
 
-          ansible-playbook --connection=local "$BASENAME"
+          ansible-playbook --connection=local --diff "$BASENAME"
 
       - name: Run Total Perspective Vortex linter.
         run: |
@@ -177,6 +178,7 @@ jobs:
         run: |
           rm -f group_vars/htcondor/vault.yml
           rm -f group_vars/htcondor-secondary/vault.yml
+          rm -f group_vars/all/ssh-keys_vault.yml
 
       - name: Update git submodules.
         working-directory: "infrastructure-playbook"
@@ -323,13 +325,13 @@ jobs:
           BASENAME="$(basename $PLAYBOOK)"
           DIRNAME="$(dirname $PLAYBOOK)"
           cd "$DIRNAME"
-          ansible-playbook --connection=local "$BASENAME"
+          ansible-playbook --connection=local --diff "$BASENAME"
 
           PLAYBOOK="${{ steps.playbooks.outputs.new }}"
           BASENAME="$(basename $PLAYBOOK)"
           DIRNAME="$(dirname $PLAYBOOK)"
           cd "$DIRNAME"
-          ansible-playbook --connection=local "$BASENAME"
+          ansible-playbook --connection=local --diff "$BASENAME"
 
       - name: Change paths of TPV configuration files in job_conf.yml
         shell: python -u {0}

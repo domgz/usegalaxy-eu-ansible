@@ -62,8 +62,7 @@ base_app_main: &BASE_APP_MAIN
   # If using MySQL and the server logs the error "MySQL server has gone
   # away", you will want to set this to some positive value (7200 should
   # work).
-  # We enabled this to circumvent some installation issues of tools, should be reverted when we update PG from version 13
-  database_engine_option_pool_recycle: 360
+  #database_engine_option_pool_recycle: -1
 
   # If large database query results are causing memory or response time
   # issues in the Galaxy process, leave the result on the server
@@ -218,7 +217,7 @@ base_app_main: &BASE_APP_MAIN
   # 'dependency_resolvers' option for details.
   # The value of this option will be resolved with respect to
   # <config_dir>.
-  dependency_resolvers_config_file: "{{ galaxy_config_dir }}/dependency_resolvers_conf.xml"
+  #dependency_resolvers_config_file: dependency_resolvers_conf.xml
 
   # conda_prefix is the location on the filesystem where Conda packages
   # and environments are installed.
@@ -321,7 +320,7 @@ base_app_main: &BASE_APP_MAIN
   # RELOADABLE_CONFIG_OPTIONS in lib/galaxy/config/__init__.py).  If
   # changes are found, modified options are automatically reloaded.
   # Takes the same values as the 'watch_tools' option.
-  watch_core_config: false
+  #watch_core_config: 'false'
 
   # Monitor the interactive tours directory specified in the
   # 'tour_config_dir' option. If changes are found, modified tours are
@@ -511,8 +510,7 @@ base_app_main: &BASE_APP_MAIN
   # <tool_data_path>.
   builds_file_path: "{{ galaxy_config_dir }}/builds.txt"
 
-  # Directory where chrom len files are kept, currently mainly used by
-  # trackster.
+  # Directory where chrom len files are kept.
   # The value of this option will be resolved with respect to
   # <tool_data_path>.
   #len_file_path: shared/ucsc/chrom
@@ -548,6 +546,10 @@ base_app_main: &BASE_APP_MAIN
   # an absolute path begin the path with '/'.  This is a comma-separated
   # list.
   tour_config_dir: "config/plugins/tours,{{ galaxy_tour_dir }}"
+
+  # Allow tools to show the option of and create interactive tours
+  # crafted for them by the backend.
+  #enable_tool_generated_tours: true
 
   # Webhooks directory: where to store webhooks - plugins to extend the
   # Galaxy UI. By default none will be loaded.  Set to
@@ -590,15 +592,6 @@ base_app_main: &BASE_APP_MAIN
   # /bin/sh - so more maximum portability tool authors should assume
   # generated commands run in sh.
   #default_job_shell: /bin/bash
-
-  # This option is deprecated, and the tool document cache will be
-  # removed in the next release. Whether to enable the tool document
-  # cache. This cache stores expanded XML strings. Enabling the tool
-  # cache results in slightly faster startup times. The tool cache is
-  # backed by a SQLite database, which cannot be stored on certain
-  # network disks. The cache location is configurable with the
-  # ``tool_cache_data_dir`` tag in tool config files.
-  #enable_tool_document_cache: false
 
   # Directory in which the toolbox search index is stored. The value of
   # this option will be resolved with respect to <data_dir>.
@@ -917,7 +910,7 @@ base_app_main: &BASE_APP_MAIN
   # Registration warning message is used to discourage people from
   # registering multiple accounts.  Applies mostly for the main Galaxy
   # instance. If no message specified the warning box will not be shown.
-  #registration_warning_message: Please register only one account - we provide this service free of charge and have limited computational resources. Multi-accounts are tracked and will be subjected to account termination and data deletion.
+  #registration_warning_message: Please register only one account to ensure fair sharing of computational resources. Multiple registrations are monitored and will result in account termination and data deletion.
 
   # User account activation feature global flag.  If set to false, the
   # rest of the Account activation configuration is ignored and user
@@ -1104,7 +1097,7 @@ base_app_main: &BASE_APP_MAIN
     'microbiome.usegalaxy.eu': Microbiome
     'microgalaxy.usegalaxy.eu': microGalaxy
     'microbiology.usegalaxy.eu': Microbiology
-    'biodiversity.usegalaxy.eu': Biodiversity
+    'biodiversity-genomics.usegalaxy.eu': Biodiversity Genomics
     'rna.usegalaxy.eu': RNA
     'graphclust.usegalaxy.eu': GraphClust
     'ecology.usegalaxy.eu': Ecology
@@ -1116,6 +1109,8 @@ base_app_main: &BASE_APP_MAIN
     'beta.usegalaxy.eu': beta
     'streetscience.usegalaxy.eu': StreetScienceCommunity
     'singlecell.usegalaxy.eu': Single Cell Omics
+    'nubri.usegalaxy.eu': NUBRI-Sudan
+    'ghana.usegalaxy.eu': Ghana
     'humancellatlas.usegalaxy.eu': Human Cell Atlas
     'ml.usegalaxy.eu': Machine Learning
     'live.usegalaxy.eu': Live
@@ -1220,6 +1215,10 @@ base_app_main: &BASE_APP_MAIN
   # The URL linked by the "How to Cite Galaxy" link in the "Help" menu.
   #citation_url: https://galaxyproject.org/citing-galaxy
 
+  # The BibTeX citation for Galaxy, to be displayed in the History Tool
+  # Reference List
+  #citation_bibtex: '@article{Galaxy2024, title="The Galaxy platform for accessible, reproducible, and collaborative data analyses: 2024 update", author="{The Galaxy Community}", journal="Nucleic Acids Research", year="2024", doi="10.1093/nar/gkae410", url="https://doi.org/10.1093/nar/gkae410"}'
+
   # The URL linked by the "Galaxy Version" link in the "Help" menu.
   #release_doc_base_url: https://docs.galaxyproject.org/en/release_
 
@@ -1232,51 +1231,47 @@ base_app_main: &BASE_APP_MAIN
   terms_url: https://usegalaxy.eu/terms
 
   # Serve static content, which must be enabled if you're not serving it
-  # via a proxy server.  These options should be self explanatory and so
-  # are not documented individually.  You can use these paths (or ones
-  # in the proxy server) to point to your own styles.
+  # via a proxy server. You can use these paths (or ones in the proxy
+  # server) to point to your own styles. The static_* options that refer
+  # to paths are relative to the current working directory.
   #static_enabled: true
 
-  # Serve static content, which must be enabled if you're not serving it
-  # via a proxy server.  These options should be self explanatory and so
-  # are not documented individually.  You can use these paths (or ones
-  # in the proxy server) to point to your own styles.
+  # Value of cache time for static content served by Galaxy. Ignored if
+  # static_enabled is false.
   #static_cache_time: 360
 
-  # Serve static content, which must be enabled if you're not serving it
-  # via a proxy server.  These options should be self explanatory and so
-  # are not documented individually.  You can use these paths (or ones
-  # in the proxy server) to point to your own styles.
+  # Path to the static content dir. Ignored if static_enabled is false.
   #static_dir: static/
 
-  # Serve static content, which must be enabled if you're not serving it
-  # via a proxy server.  These options should be self explanatory and so
-  # are not documented individually.  You can use these paths (or ones
-  # in the proxy server) to point to your own styles.
-  #static_images_dir: static/images
+  # Path to the built Galaxy client application, static/dist/ in the
+  # Galaxy source code after the build is complete. Ignored if
+  # static_enabled is false.
+  #static_dist_dir: static/dist/
 
-  # Serve static content, which must be enabled if you're not serving it
-  # via a proxy server.  These options should be self explanatory and so
-  # are not documented individually.  You can use these paths (or ones
-  # in the proxy server) to point to your own styles.
-  #static_favicon_dir: static/favicon.ico
+  # Path to the static images directory. Ignored if static_enabled is
+  # false.
+  #static_images_dir: static/images/
 
-  # Serve static content, which must be enabled if you're not serving it
-  # via a proxy server.  These options should be self explanatory and so
-  # are not documented individually.  You can use these paths (or ones
-  # in the proxy server) to point to your own styles.
+  # Path to favicon.ico, not the directory that contains it (the name is
+  # a misnomer). Ignored if static_enabled is false.
+  static_favicon_dir: static/favicon_eu.ico
+  static_favicon_dir_by_host: >
+    {
+    '{{ galaxy_themes_instance_domain }}': 'static/favicon_eu.ico',
+    {% for subdomain in galaxy_themes_subdomains %}
+    '{{ subdomain.name }}.{{ galaxy_themes_instance_domain }}': '{{ galaxy_themes_static_path }}/static-{{ subdomain.name }}/favicon_eu.ico',
+    {% endfor %}
+    }
+
+  # Path to the static scripts directory. Ignored if static_enabled is
+  # false.
   #static_scripts_dir: static/scripts/
 
-  # Serve static content, which must be enabled if you're not serving it
-  # via a proxy server.  These options should be self explanatory and so
-  # are not documented individually.  You can use these paths (or ones
-  # in the proxy server) to point to your own styles.
-  #static_style_dir: static/style
+  # Path to the static style directory. Ignored if static_enabled is
+  # false.
+  #static_style_dir: static/style/
 
-  # Serve static content, which must be enabled if you're not serving it
-  # via a proxy server.  These options should be self explanatory and so
-  # are not documented individually.  You can use these paths (or ones
-  # in the proxy server) to point to your own styles.
+  # Path to robots.txt. Ignored if static_enabled is false.
   #static_robots_txt: static/robots.txt
 
   # Incremental Display Options
@@ -1587,7 +1582,7 @@ base_app_main: &BASE_APP_MAIN
   # Set to a number between 0 and 1. With this option set, every
   # transaction created will have that percentage chance of being sent
   # to Sentry. A value higher than 0 is required to analyze performance.
-  #sentry_traces_sample_rate: 0.0
+  sentry_traces_sample_rate: 0.005
 
   # Use this option to provide the path to location of the CA
   # (Certificate Authority) certificate file if the sentry server uses a
@@ -1822,13 +1817,21 @@ base_app_main: &BASE_APP_MAIN
   # page (even if require_login is true).
   show_welcome_with_login: true
 
-  # Controls the order of the login page to prefer Custos-based login
-  # and registration.
-  #prefer_custos_login: false
+  # Controls the order of the login page to prefer OIDC-based login and
+  # registration.
+  #prefer_oidc_login: false
 
-  # Allow unregistered users to create new accounts (otherwise, they
-  # will have to be created by an admin).
-  #allow_user_creation: true
+  # Allow unregistered users to create new local (non-OIDC) accounts
+  # (otherwise, they will have to be created by an admin). This option
+  # will be overridden to false in case disable_local_accounts is set to
+  # true.
+  #allow_local_account_creation: true
+
+  # Disable local accounts. If this option is set to true, at least one
+  # OIDC provider needs to be configured and will serve as the account
+  # provider. If this option is set to true, allow_local_account
+  # creation will be overridden with false.
+  #disable_local_accounts: false
 
   # Allow administrators to delete accounts.
   allow_user_deletion: true
@@ -1963,7 +1966,7 @@ base_app_main: &BASE_APP_MAIN
   # because model objects are expunged from the SQL alchemy session
   # between workflow invocation scheduling iterations. Set to -1 to
   # disable any such maximum.
-  maximum_workflow_jobs_per_scheduling_iteration: 100
+  #maximum_workflow_jobs_per_scheduling_iteration: 1000
 
   # Maximum number of datasets to create before flushing created
   # datasets to database. This affects tools that create many output
@@ -1996,6 +1999,23 @@ base_app_main: &BASE_APP_MAIN
   # The value of this option will be resolved with respect to
   # <config_dir>.
   oidc_backends_config_file: "{{ galaxy_config_dir }}/oidc_backends_config.xml"
+
+  # Sets the full sequence of steps that Python Social Auth goes through
+  # when authenticating an OIDC login. Use when you want to completely
+  # customize the pipeline (e.g. for testing).
+  # By default, Galaxy uses galaxy.authnz.psa_authnz.AUTH_PIPELINE - see
+  # there for example steps.
+  # Each element should be an import path to a function, e.g.
+  # galaxy.authnz.psa_authnz.contains_required_data
+  #oidc_auth_pipeline: null
+
+  # Sets additional authentication pipeline steps, added after the
+  # default steps (from galaxy.authnz.psa_authnz.AUTH_PIPELINE).
+  # Use when you want to keep the default pipeline, but add additional
+  # custom processing.
+  # Each element should be an import path to a function, e.g.
+  # galaxy.authnz.psa_authnz.contains_required_data
+  #oidc_auth_pipeline_extra: null
 
   # Sets the prefix for OIDC scopes specific to this Galaxy instance. If
   # an API call is made against this Galaxy instance using an OIDC
@@ -2221,7 +2241,16 @@ base_app_main: &BASE_APP_MAIN
   # The syntax, available resolvers, and documentation of their options
   # is explained in detail in the documentation:
   # https://docs.galaxyproject.org/en/master/admin/dependency_resolvers.html
-  #dependency_resolvers: null
+  dependency_resolvers:
+    - type: tool_shed_packages
+    - type: galaxy_packages
+    - type: conda
+      read_only: true
+    - type: conda
+      versionless: true
+      read_only: true
+    - type: galaxy_packages
+      versionless: true
 
   # Alternative representation of various dependency resolution
   # parameters. Takes the dictified version of a DependencyManager
@@ -2578,7 +2607,6 @@ base_app_main: &BASE_APP_MAIN
   # database located in your <galaxy>/database folder (indicated in the
   # commented out line below).
   amqp_internal_connection: "pyamqp://galaxy:{{ rabbitmq_password_galaxy }}@mq.galaxyproject.eu:5671/galaxy?ssl=1"
-  #amqp_internal_connection: "amqp://galaxy:{{ rabbitmq_password_galaxy }}@localhost:5672/galaxy"
 
   # Offload long-running tasks to a Celery task queue. Activate this
   # only if you have setup a Celery worker for Galaxy and you have
@@ -2604,13 +2632,6 @@ base_app_main: &BASE_APP_MAIN
   # disabled on a per-task basis at this time.)
   # For details, see Celery documentation at
   # https://docs.celeryq.dev/en/stable/userguide/configuration.html.
-  #celery_conf:
-  #  broker_url: null
-  #  result_backend: null
-  #  task_routes:
-  #    galaxy.fetch_data: galaxy.external
-  #    galaxy.set_job_metadata: galaxy.external
-
   celery_conf:
     result_backend: "{{ redis_connection_string }}"
     result_expires: 259200 # in sec = 3 days, delete task runs at 4 am, see celery docs
@@ -2645,13 +2666,20 @@ base_app_main: &BASE_APP_MAIN
 
   # API key for an AI provider. AI provider is Openai By default
   # (https://openai.com/) to enable the wizard (or more?)
-  openai_api_key: "{{ openai_api_key }}"
+  ai_api_key: "{{ galaxy_infrastructure_llm_api_key }}"
 
   # AI API base URL. Needs to be OpenAI compatible, defaults to OpenAI
-  #ai_api_base_url: null
+  ai_api_base_url: "{{ galaxy_infrastructure_llm_url }}"
 
-  # AI model to enable the wizard.
-  #ai_model: gpt-4o
+  # AI model to enable the wizard. Global fallback for all AI agents.
+  ai_model: gpt-oss-120b-llmlb
+
+  # Configuration for AI inference services used by agents. Supports
+  # per-agent model, temperature, and token settings. Agents inherit
+  # from 'default' configuration, which itself falls back to global
+  # ai_model/ai_api_key settings. Example: inference_services: {
+  # default: { model: gpt-4o-mini, temperature: 0.7 } }
+  #inference_services: null
 
   # Allow the display of tool recommendations in workflow editor and
   # after tool execution. If it is enabled and set to true, please
@@ -2701,7 +2729,19 @@ base_app_main: &BASE_APP_MAIN
   # Vault config file.
   # The value of this option will be resolved with respect to
   # <config_dir>.
-  vault_config_file: vault_conf.yml
+  #vault_config_file: vault_conf.yml
+
+  # Configuration file for URL request headers allow-list with URL
+  # pattern matching. This file defines which HTTP headers are allowed
+  # in URL fetch requests based on URL patterns, and whether they should
+  # be treated as sensitive (encrypted in the vault) or not. If no
+  # allow-list is specified, no headers will be allowed in URL requests.
+  # This provides fine-grained security control over what headers can be
+  # sent when Galaxy fetches external URLs on behalf of users, allowing
+  # different headers for different target domains or services.
+  # The value of this option will be resolved with respect to
+  # <config_dir>.
+  #url_headers_config_file: url_headers_conf.yml
 
   # Display built-in converters in the tool panel.
   #display_builtin_converters: true
@@ -2787,7 +2827,7 @@ base_app_main: &BASE_APP_MAIN
   # automatically install these dependencies if the tool_dependency_dir
   # is properly configured in the galaxy.yml file. This option should be
   # set to false if containerized versions of tools are used.
-  #install_tool_dependencies: true
+  install_tool_dependencies: false
 
   # Set the default value in the Admin UI to automatically install
   # repository dependencies when installing tools from the Tool Shed.
@@ -2796,7 +2836,7 @@ base_app_main: &BASE_APP_MAIN
   # suites. Repository dependencies ensure that all necessary components
   # are installed for the tool (or suite) to work correctly within the
   # Galaxy environment.
-  #install_repository_dependencies: true
+  install_repository_dependencies: false
 
   # Set the default value in the Admin UI to automatically install
   # resolver dependencies when installing tools from the Tool Shed.
@@ -2805,7 +2845,7 @@ base_app_main: &BASE_APP_MAIN
   # Galaxy uses dependency resolvers (e.g., Conda) to determine how to
   # satisfy these dependencies. This option should be set to false if
   # containerized versions of tools are used.
-  #install_resolver_dependencies: true
+  install_resolver_dependencies: false
 
   # Enables the cleanup of failed Galaxy job's working directories. Runs
   # in a Celery task.
@@ -2826,6 +2866,7 @@ base_app_main: &BASE_APP_MAIN
  # TODO(hxr): UNDOCUMENTED
   ucsc_build_sites: "{{ galaxy_config_dir }}/ucsc_build_sites.txt"
 
+# Not sure if this option is still needed.
 galaxy_config_hash:
   "uwsgi": {}
   "galaxy":
