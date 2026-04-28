@@ -101,7 +101,7 @@ jobs:
         working-directory: "galaxy"
         run: |
           TPV_REQ=$(perl -pe 's/\\\n/ /' lib/galaxy/dependencies/conditional-requirements.txt | grep total-perspective-vortex)
-          uv pip install --system --upgrade "$TPV_REQ"
+          uv pip install --system --upgrade total-perspective-vortex==3.2.1
 
       - name: Install port of Ansible filters for Jinja (required for the next step).
         run: |
@@ -253,7 +253,7 @@ jobs:
         working-directory: "galaxy"
         run: |
           TPV_REQ=$(perl -pe 's/\\\n/ /' lib/galaxy/dependencies/conditional-requirements.txt | grep total-perspective-vortex)
-          uv pip install --system --upgrade "$TPV_REQ"
+          uv pip install --system --upgrade total-perspective-vortex==3.2.1
 
       - name: Install port of Ansible filters for Jinja.
         run: |
